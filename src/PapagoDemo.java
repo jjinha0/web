@@ -1,32 +1,37 @@
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-
 /**
  * Created by danawacomputer on 2017-04-14.
  */
-public class searchpro {
+public class PapagoDemo {
     public static void main(String[] args) {
-        String clientId = "1IU_nqebCJzq8n0oiN_K";
-        String clientSecret = "VVImcC3JQk";
+        String source = "I drink too much and that's an issue";
+        String clientId = "1IU_nqebCJzq8n0oiN_K";//애플리케이션 클라이언트 아이디값";
+        String clientSecret = "VVImcC3JQk";//애플리케이션 클라이언트 시크릿값";
         try {
-            String text = URLEncoder.encode("데이터과학","UTF-8");
-            String apiURL = "https://openapi.naver.com/v1/search/blog?query="+ text;
-
+            String text = URLEncoder.encode(source, "UTF-8");
+            String apiURL = "https://openapi.naver.com/v1/language/translate";
             URL url = new URL(apiURL);
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("GET");
+            con.setRequestMethod("POST");
             con.setRequestProperty("X-Naver-Client-Id", clientId);
             con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
+            // post request
+            String postParams = "source=en&target=ko&text=" + text;
+            con.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(postParams);
+            wr.flush();
+            wr.close();
             int responseCode = con.getResponseCode();
             BufferedReader br;
-            if(responseCode == 200) {
+            if(responseCode==200) { // 정상 호출
                 br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else {
+            } else {  // 에러 발생
                 br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
             }
             String inputLine;
@@ -36,10 +41,8 @@ public class searchpro {
             }
             br.close();
             System.out.println(response.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 }
